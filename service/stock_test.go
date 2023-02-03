@@ -37,14 +37,11 @@ func TestMain(t *testing.M) {
 }
 
 func TestOrder(t *testing.T) {
-	t.Parallel()
 	err := stock.Order(orders)
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	printWarehouseStock(stock)
-
 }
 
 func printWarehouseStock(s *Stock) {
