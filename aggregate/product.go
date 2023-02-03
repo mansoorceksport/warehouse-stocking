@@ -7,7 +7,8 @@ import (
 )
 
 var (
-	ErrProductInvalid = errors.New("a product have a valid name")
+	ErrProductInvalid    = errors.New("a product have a valid name")
+	ErrStockNotAvailable = errors.New("stock not available")
 )
 
 type Product struct {
@@ -51,4 +52,21 @@ func (p Product) GetID() uuid.UUID {
 
 func (p Product) SetID(id uuid.UUID) {
 	p.item.ID = id
+}
+
+func (p Product) AddQuantity(q int) {
+	p.SetQuantity(p.GetQuantity() + q)
+}
+
+func (p Product) ReduceQuantity(q int) error {
+	qu := p.GetQuantity() - q
+	if qu < 0 {
+		return ErrStockNotAvailable
+	}
+	p.SetQuantity(qu)
+	return nil
+}
+
+func (p Product) GetPrice() float64 {
+	return p.GetPrice()
 }

@@ -8,18 +8,18 @@ import (
 )
 
 type Memory struct {
-	products map[uuid.UUID]aggregate.Product
+	storeProducts map[uuid.UUID]aggregate.Product
 	sync.Mutex
 }
 
-func NewMemoryStockInventory() *Memory {
+func NewMemoryStoreInventory() *Memory {
 	return &Memory{
-		products: make(map[uuid.UUID]aggregate.Product),
+		storeProducts: make(map[uuid.UUID]aggregate.Product),
 	}
 }
 
 func (m *Memory) GetByID(id uuid.UUID) (aggregate.Product, error) {
-	if p, ok := m.products[id]; ok {
+	if p, ok := m.storeProducts[id]; ok {
 		return p, nil
 	}
 
@@ -28,7 +28,7 @@ func (m *Memory) GetByID(id uuid.UUID) (aggregate.Product, error) {
 
 func (m *Memory) GetAll() []aggregate.Product {
 	var products []aggregate.Product
-	for _, p := range m.products {
+	for _, p := range m.storeProducts {
 		products = append(products, p)
 	}
 	return products
@@ -37,10 +37,10 @@ func (m *Memory) GetAll() []aggregate.Product {
 func (m *Memory) Add(product aggregate.Product) error {
 	m.Lock()
 	defer m.Unlock()
-	if _, ok := m.products[product.GetID()]; ok {
+	if _, ok := m.storeProducts[product.GetID()]; ok {
 		return storeinventory.ErrProductAlreadyExists
 	}
-	m.products[product.GetID()] = product
+	m.storeProducts[product.GetID()] = product
 
 	return nil
 }
@@ -48,19 +48,23 @@ func (m *Memory) Add(product aggregate.Product) error {
 func (m *Memory) Update(product aggregate.Product) error {
 	m.Lock()
 	defer m.Unlock()
-	if _, ok := m.products[product.GetID()]; !ok {
+	if _, ok := m.storeProducts[product.GetID()]; !ok {
 		return storeinventory.ErrProductNotFound
 	}
-	m.products[product.GetID()] = product
+	m.storeProducts[product.GetID()] = product
 	return nil
 }
 
 func (m *Memory) Delete(id uuid.UUID) error {
 	m.Lock()
 	defer m.Unlock()
-	if _, ok := m.products[id]; !ok {
+	if _, ok := m.storeProducts[id]; !ok {
 		return storeinventory.ErrProductNotFound
 	}
-	delete(m.products, id)
+	delete(m.storeProducts, id)
 	return nil
+}
+
+func (m *Memory) StoreInventory() string {
+	return "Store Inventory"
 }

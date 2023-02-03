@@ -1,4 +1,4 @@
-package service
+package stock
 
 import (
 	"fmt"
@@ -36,18 +36,27 @@ func TestMain(t *testing.M) {
 	t.Run()
 }
 
-func TestOrder(t *testing.T) {
-	err := stock.Order(orders)
+func TestRequest(t *testing.T) {
+	err := stock.Request(orders)
 	if err != nil {
 		t.Fatal(err)
 	}
 	printWarehouseStock(stock)
+	printStoreStock(stock)
 }
 
 func printWarehouseStock(s *Stock) {
 	warehouseInventoryProducts := s.warehouseInventory.GetAll()
 	fmt.Printf("===============\n")
 	for _, p := range warehouseInventoryProducts {
-		fmt.Printf("%s quantity is %d \n", p.GetName(), p.GetQuantity())
+		fmt.Printf("Warehouse: %s quantity is %d \n", p.GetName(), p.GetQuantity())
+	}
+}
+
+func printStoreStock(s *Stock) {
+	storeInventoryProducts := s.storeInventory.GetAll()
+	fmt.Printf("===============\n")
+	for _, p := range storeInventoryProducts {
+		fmt.Printf("Store: %s quantity is %d \n", p.GetName(), p.GetQuantity())
 	}
 }

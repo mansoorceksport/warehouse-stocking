@@ -17,4 +17,5 @@ type Repository interface {
 	Add(product aggregate.Product) error
 	Update(product aggregate.Product) error
 	Delete(id uuid.UUID) error
+	StoreInventory() string
 }
