@@ -1,7 +1,6 @@
 package stock
 
 import (
-	"fmt"
 	"github.com/mansoorceksport/warehouse-stocking/aggregate"
 	"testing"
 )
@@ -19,11 +18,11 @@ func TestMain(t *testing.M) {
 	grapes, _ := aggregate.NewProduct("grapes", 10, 0.99)
 
 	products = append(products, apple, orange, grapes)
-	s, _ := NewStock(WithMemoryStoreInventory(), WithMemoryWarehouseInventory())
-	stock = s
-	for _, p := range products {
-		_ = stock.warehouseInventory.Add(p)
-	}
+	//s, _ := NewStock(WithMemoryStoreInventory(), WithMemoryWarehouseInventory())
+	//stock = s
+	//for _, p := range products {
+	//	_ = stock.warehouseInventory.Add(p)
+	//}
 
 	orderApple, _ := aggregate.NewProduct("apple", 2, 0.99)
 
@@ -41,22 +40,22 @@ func TestRequest(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	printWarehouseStock(stock)
-	printStoreStock(stock)
+	//printWarehouseStock(stock)
+	//printStoreStock(stock)
 }
 
-func printWarehouseStock(s *Stock) {
-	warehouseInventoryProducts := s.warehouseInventory.GetAll()
-	fmt.Printf("===============\n")
-	for _, p := range warehouseInventoryProducts {
-		fmt.Printf("Warehouse: %s quantity is %d \n", p.GetName(), p.GetQuantity())
-	}
-}
-
-func printStoreStock(s *Stock) {
-	storeInventoryProducts := s.storeInventory.GetAll()
-	fmt.Printf("===============\n")
-	for _, p := range storeInventoryProducts {
-		fmt.Printf("Store: %s quantity is %d \n", p.GetName(), p.GetQuantity())
-	}
-}
+//func printWarehouseStock(s *Stock) {
+//	warehouseInventoryProducts := s.warehouseInventory.GetAll()
+//	fmt.Printf("===============\n")
+//	for _, p := range warehouseInventoryProducts {
+//		fmt.Printf("Warehouse: %s quantity is %d \n", p.GetName(), p.GetQuantity())
+//	}
+//}
+//
+//func printStoreStock(s *Stock) {
+//	storeInventoryProducts := s.storeInventory.GetAll()
+//	fmt.Printf("===============\n")
+//	for _, p := range storeInventoryProducts {
+//		fmt.Printf("Store: %s quantity is %d \n", p.GetName(), p.GetQuantity())
+//	}
+//}
