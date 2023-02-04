@@ -3,23 +3,48 @@ package store
 import (
 	"github.com/mansoorceksport/warehouse-stocking/aggregate"
 	"github.com/mansoorceksport/warehouse-stocking/repository/storeinventory"
+	memoryStoreInventory "github.com/mansoorceksport/warehouse-stocking/repository/storeinventory/memory"
 	"github.com/mansoorceksport/warehouse-stocking/service/stock"
-	"sync"
+	"github.com/mansoorceksport/warehouse-stocking/service/warehouse"
 )
 
+type Configuration func(stock *Store) error
+
 type Store struct {
-	stock          stock.Stock
+	stock          *stock.Stock
 	storeInventory storeinventory.Repository
-	sync.Mutex
 }
 
-func NewStore(st stock.Stock) *Store {
-	return &Store{stock: st}
+func NewStore(configuration ...Configuration) *Store {
+	store := &Store{}
+	for _, c := range configuration {
+		err := c(store)
+		if err != nil {
+			return nil
+		}
+	}
+	return store
+}
+
+func WithMemoryStoreInventory() Configuration {
+	return func(store *Store) error {
+		store.storeInventory = memoryStoreInventory.NewMemoryStoreInventory()
+		return nil
+	}
+}
+
+func WithStockService(wh *warehouse.Warehouse) Configuration {
+	return func(store *Store) error {
+		st, err := stock.NewStock(wh)
+		if err != nil {
+			return err
+		}
+		store.stock = st
+		return nil
+	}
 }
 
 func (s *Store) RequestStock(requestProducts []aggregate.Product) error {
-	s.Unlock()
-	defer s.Unlock()
 	err := s.stock.Request(requestProducts)
 	if err != nil {
 		return err
