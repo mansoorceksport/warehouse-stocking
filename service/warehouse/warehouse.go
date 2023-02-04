@@ -57,7 +57,7 @@ func (w *Warehouse) AddWarehouse(aw aggregate.Warehouse) error {
 	return nil
 }
 
-func (w *Warehouse) ProcessStock(requestProducts []aggregate.Product) error {
+func (w *Warehouse) ProcessStockRequest(requestProducts []aggregate.Product) error {
 	w.Lock()
 	defer w.Unlock()
 

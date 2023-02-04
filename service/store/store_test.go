@@ -2,13 +2,11 @@ package store
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/mansoorceksport/warehouse-stocking/aggregate"
 	"github.com/mansoorceksport/warehouse-stocking/service/warehouse"
 	"testing"
 )
 
-var warehouseId uuid.UUID
 var store *Store
 var products []aggregate.Product
 var orders []aggregate.Product
@@ -27,7 +25,6 @@ func TestMain(m *testing.M) {
 		return
 	}
 	w, err := aggregate.NewWareHouse("warehouse one")
-	warehouseId = w.GetID()
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -46,7 +43,7 @@ func TestMain(m *testing.M) {
 	store = NewStore(
 		WithMemoryStoreRepository(),
 		WithMemoryStoreInventoryRepository(),
-		WithStockService(wh),
+		WithWarehouseService(wh),
 	)
 	s, err := aggregate.NewStore("jakarta one")
 	if err != nil {
@@ -70,5 +67,15 @@ func TestStore_RequestStock(t *testing.T) {
 	err := store.RequestStock(orders)
 	if err != nil {
 		t.Fatal(err)
+	}
+	printStoreStock()
+}
+
+func printStoreStock() {
+	storeInventoryProducts := store.storeInventoryRepository.GetAll()
+	//w := store.warehouseService..GetById(warehouseId)
+	fmt.Printf("|================|\n")
+	for _, p := range storeInventoryProducts {
+		fmt.Printf("Store: %s quantity is %d \n", p.GetName(), p.GetQuantity())
 	}
 }

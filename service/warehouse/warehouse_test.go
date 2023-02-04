@@ -48,7 +48,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestWarehouse_ProcessStock(t *testing.T) {
-	err := warehouse.ProcessStock(orders)
+	err := warehouse.ProcessStockRequest(orders)
 	if err != nil {
 		t.Fatal(err)
 	}

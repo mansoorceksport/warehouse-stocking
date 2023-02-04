@@ -7,7 +7,6 @@ import (
 	memoryStoreRepository "github.com/mansoorceksport/warehouse-stocking/repository/store/memory"
 	storeInventoryRepository "github.com/mansoorceksport/warehouse-stocking/repository/storeinventory"
 	memoryStoreInventory "github.com/mansoorceksport/warehouse-stocking/repository/storeinventory/memory"
-	"github.com/mansoorceksport/warehouse-stocking/service/stock"
 	"github.com/mansoorceksport/warehouse-stocking/service/warehouse"
 )
 
@@ -19,7 +18,7 @@ type Configuration func(stock *Store) error
 
 type Store struct {
 	storeRepository          storeRepository.Repository
-	stock                    *stock.Stock
+	warehouseService         *warehouse.Warehouse
 	storeInventoryRepository storeInventoryRepository.Repository
 }
 
@@ -48,13 +47,9 @@ func WithMemoryStoreRepository() Configuration {
 	}
 }
 
-func WithStockService(wh *warehouse.Warehouse) Configuration {
+func WithWarehouseService(wh *warehouse.Warehouse) Configuration {
 	return func(store *Store) error {
-		st, err := stock.NewStock(wh)
-		if err != nil {
-			return err
-		}
-		store.stock = st
+		store.warehouseService = wh
 		return nil
 	}
 }
@@ -64,7 +59,7 @@ func (s *Store) RequestStock(requestProducts []aggregate.Product) error {
 		return ErrRequestProductEmpty
 	}
 
-	err := s.stock.Request(requestProducts)
+	err := s.warehouseService.ProcessStockRequest(requestProducts)
 	if err != nil {
 		return err
 	}
