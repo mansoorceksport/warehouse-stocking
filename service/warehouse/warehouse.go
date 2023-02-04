@@ -2,34 +2,45 @@ package warehouse
 
 import (
 	"github.com/mansoorceksport/warehouse-stocking/aggregate"
+	warehouseRepository "github.com/mansoorceksport/warehouse-stocking/repository/warehouse"
+	memoryWarehouseRepository "github.com/mansoorceksport/warehouse-stocking/repository/warehouse/memory"
 	"github.com/mansoorceksport/warehouse-stocking/repository/warehouseinventory"
-	warehouseInventory "github.com/mansoorceksport/warehouse-stocking/repository/warehouseinventory/memory"
+	memoryWarehouseInventoryRepository "github.com/mansoorceksport/warehouse-stocking/repository/warehouseinventory/memory"
 	"sync"
 )
 
 type Configuration func(wh *Warehouse) error
 
 type Warehouse struct {
-	warehouseInventory warehouseinventory.Repository
+	warehouseRepository          warehouseRepository.Repository
+	warehouseInventoryRepository warehouseinventory.Repository
 	sync.Mutex
 }
 
-func NewWarehouse(configuration ...Configuration) *Warehouse {
+func NewWarehouse(configuration ...Configuration) (*Warehouse, error) {
 	wh := &Warehouse{}
+
 	for _, c := range configuration {
 		err := c(wh)
 		if err != nil {
-			return nil
+			return nil, err
 		}
 	}
-	return wh
+	return wh, nil
 }
 
-func WithMemoryWarehouse(products []aggregate.Product) Configuration {
+func WithMemoryWarehouse() Configuration {
 	return func(wh *Warehouse) error {
-		wh.warehouseInventory = warehouseInventory.NewMemoryWarehouseInventory()
+		wh.warehouseRepository = memoryWarehouseRepository.NewMemoryWareHouse()
+		return nil
+	}
+}
+
+func WithMemoryWarehouseInventory(products []aggregate.Product) Configuration {
+	return func(wh *Warehouse) error {
+		wh.warehouseInventoryRepository = memoryWarehouseInventoryRepository.NewMemoryWarehouseInventory()
 		for _, product := range products {
-			err := wh.warehouseInventory.Add(product)
+			err := wh.warehouseInventoryRepository.Add(product)
 			if err != nil {
 				return err
 			}
@@ -38,13 +49,21 @@ func WithMemoryWarehouse(products []aggregate.Product) Configuration {
 	}
 }
 
+func (w *Warehouse) AddWarehouse(aw aggregate.Warehouse) error {
+	err := w.warehouseRepository.Add(aw)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (w *Warehouse) ProcessStock(requestProducts []aggregate.Product) error {
 	w.Lock()
 	defer w.Unlock()
 
 	var processedProduct []aggregate.Product
 	for _, requestProduct := range requestProducts {
-		warehouseProduct, err := w.warehouseInventory.GetByID(requestProduct.GetID())
+		warehouseProduct, err := w.warehouseInventoryRepository.GetByID(requestProduct.GetID())
 		if err != nil {
 			return err
 		}
@@ -57,7 +76,7 @@ func (w *Warehouse) ProcessStock(requestProducts []aggregate.Product) error {
 	}
 
 	for _, pp := range processedProduct {
-		err := w.warehouseInventory.Update(pp)
+		err := w.warehouseInventoryRepository.Update(pp)
 		if err != nil {
 			return err
 		}

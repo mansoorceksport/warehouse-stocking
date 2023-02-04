@@ -21,7 +21,7 @@ func TestMain(t *testing.M) {
 	//s, _ := NewStock(WithMemoryStoreInventory(), WithMemoryWarehouseInventory())
 	//stock = s
 	//for _, p := range products {
-	//	_ = stock.warehouseInventory.Add(p)
+	//	_ = stock.warehouseInventory.AddWarehouse(p)
 	//}
 
 	orderApple, _ := aggregate.NewProduct("apple", 2, 0.99)

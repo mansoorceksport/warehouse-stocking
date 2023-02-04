@@ -1,34 +1,49 @@
 package store
 
 import (
+	"errors"
 	"github.com/mansoorceksport/warehouse-stocking/aggregate"
+	storeRepository "github.com/mansoorceksport/warehouse-stocking/repository/store"
+	memoryStoreRepository "github.com/mansoorceksport/warehouse-stocking/repository/store/memory"
 	"github.com/mansoorceksport/warehouse-stocking/repository/storeinventory"
 	memoryStoreInventory "github.com/mansoorceksport/warehouse-stocking/repository/storeinventory/memory"
 	"github.com/mansoorceksport/warehouse-stocking/service/stock"
 	"github.com/mansoorceksport/warehouse-stocking/service/warehouse"
 )
 
+var (
+	ErrRequestProductEmpty = errors.New("request product empty")
+)
+
 type Configuration func(stock *Store) error
 
 type Store struct {
-	stock          *stock.Stock
-	storeInventory storeinventory.Repository
+	storeRepository storeRepository.Repository
+	stock           *stock.Stock
+	storeInventory  storeinventory.Repository
 }
 
 func NewStore(configuration ...Configuration) *Store {
-	store := &Store{}
+	s := &Store{}
 	for _, c := range configuration {
-		err := c(store)
+		err := c(s)
 		if err != nil {
 			return nil
 		}
 	}
-	return store
+	return s
 }
 
-func WithMemoryStoreInventory() Configuration {
+func WithMemoryStoreInventoryRepository() Configuration {
 	return func(store *Store) error {
 		store.storeInventory = memoryStoreInventory.NewMemoryStoreInventory()
+		return nil
+	}
+}
+
+func WithMemoryStoreRepository() Configuration {
+	return func(store *Store) error {
+		store.storeRepository = memoryStoreRepository.NewStoreMemoryRepository()
 		return nil
 	}
 }
@@ -45,6 +60,10 @@ func WithStockService(wh *warehouse.Warehouse) Configuration {
 }
 
 func (s *Store) RequestStock(requestProducts []aggregate.Product) error {
+	if len(requestProducts) == 0 {
+		return ErrRequestProductEmpty
+	}
+
 	err := s.stock.Request(requestProducts)
 	if err != nil {
 		return err

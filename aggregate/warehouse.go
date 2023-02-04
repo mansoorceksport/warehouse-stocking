@@ -12,11 +12,10 @@ var (
 
 type Warehouse struct {
 	depot *entity.Depot
-	items []*entity.Item
 }
 
 func NewWareHouse(name string) (Warehouse, error) {
-	if name != "" {
+	if name == "" {
 		return Warehouse{}, ERRInvalidWarehouse
 	}
 	return Warehouse{
@@ -24,7 +23,6 @@ func NewWareHouse(name string) (Warehouse, error) {
 			ID:   uuid.New(),
 			Name: name,
 		},
-		items: make([]*entity.Item, 0),
 	}, nil
 }
 
@@ -39,6 +37,10 @@ func (c *Warehouse) SetID(id uuid.UUID) {
 	c.depot.ID = id
 }
 
-func (c *Warehouse) GetProducts() []*entity.Item {
-	return c.items
+func (c *Warehouse) SetName(name string) {
+	c.depot.Name = name
+}
+
+func (c *Warehouse) GetName() string {
+	return c.depot.Name
 }

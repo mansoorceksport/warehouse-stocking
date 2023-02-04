@@ -11,8 +11,7 @@ var (
 )
 
 type Store struct {
-	store    *entity.Store
-	products []*entity.Item
+	store *entity.Store
 }
 
 func NewStore(name string) (Store, error) {
@@ -25,7 +24,6 @@ func NewStore(name string) (Store, error) {
 			ID:   uuid.New(),
 			Name: name,
 		},
-		products: make([]*entity.Item, 0),
 	}, nil
 }
 
@@ -38,8 +36,4 @@ func (s *Store) SetID(id uuid.UUID) {
 		s.store = &entity.Store{}
 	}
 	s.store.ID = id
-}
-
-func (s *Store) GetProducts() []*entity.Item {
-	return s.products
 }
