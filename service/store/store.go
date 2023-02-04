@@ -5,7 +5,7 @@ import (
 	"github.com/mansoorceksport/warehouse-stocking/aggregate"
 	storeRepository "github.com/mansoorceksport/warehouse-stocking/repository/store"
 	memoryStoreRepository "github.com/mansoorceksport/warehouse-stocking/repository/store/memory"
-	"github.com/mansoorceksport/warehouse-stocking/repository/storeinventory"
+	storeInventoryRepository "github.com/mansoorceksport/warehouse-stocking/repository/storeinventory"
 	memoryStoreInventory "github.com/mansoorceksport/warehouse-stocking/repository/storeinventory/memory"
 	"github.com/mansoorceksport/warehouse-stocking/service/stock"
 	"github.com/mansoorceksport/warehouse-stocking/service/warehouse"
@@ -18,9 +18,9 @@ var (
 type Configuration func(stock *Store) error
 
 type Store struct {
-	storeRepository storeRepository.Repository
-	stock           *stock.Stock
-	storeInventory  storeinventory.Repository
+	storeRepository          storeRepository.Repository
+	stock                    *stock.Stock
+	storeInventoryRepository storeInventoryRepository.Repository
 }
 
 func NewStore(configuration ...Configuration) *Store {
@@ -36,7 +36,7 @@ func NewStore(configuration ...Configuration) *Store {
 
 func WithMemoryStoreInventoryRepository() Configuration {
 	return func(store *Store) error {
-		store.storeInventory = memoryStoreInventory.NewMemoryStoreInventory()
+		store.storeInventoryRepository = memoryStoreInventory.NewMemoryStoreInventory()
 		return nil
 	}
 }
@@ -70,7 +70,7 @@ func (s *Store) RequestStock(requestProducts []aggregate.Product) error {
 	}
 
 	for _, requestProduct := range requestProducts {
-		sp, err := s.storeInventory.GetByID(requestProduct.GetID())
+		sp, err := s.storeInventoryRepository.GetByID(requestProduct.GetID())
 		if err != nil {
 			p, err := aggregate.NewProduct(requestProduct.GetName(), requestProduct.GetQuantity(), 0.0)
 			p.SetID(requestProduct.GetID())
@@ -78,13 +78,13 @@ func (s *Store) RequestStock(requestProducts []aggregate.Product) error {
 				return nil
 			}
 
-			err = s.storeInventory.Add(p)
+			err = s.storeInventoryRepository.Add(p)
 			if err != nil {
 				return err
 			}
 		} else {
 			sp.AddQuantity(requestProduct.GetQuantity())
-			err := s.storeInventory.Update(sp)
+			err := s.storeInventoryRepository.Update(sp)
 			if err != nil {
 				return err
 			}
