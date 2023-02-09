@@ -1,9 +1,10 @@
 package warehouse
 
 import (
+	"context"
 	"github.com/mansoorceksport/warehouse-stocking/aggregate"
-	warehouseRepository "github.com/mansoorceksport/warehouse-stocking/repository/warehouse"
-	memoryWarehouseRepository "github.com/mansoorceksport/warehouse-stocking/repository/warehouse/memory"
+	warehouseRepository "github.com/mansoorceksport/warehouse-stocking/repository/depot"
+	memoryWarehouseRepository "github.com/mansoorceksport/warehouse-stocking/repository/depot/memory"
 	"github.com/mansoorceksport/warehouse-stocking/repository/warehouseinventory"
 	memoryWarehouseInventoryRepository "github.com/mansoorceksport/warehouse-stocking/repository/warehouseinventory/memory"
 	"sync"
@@ -50,7 +51,8 @@ func WithMemoryWarehouseInventory(products []aggregate.Product) Configuration {
 }
 
 func (w *Warehouse) AddWarehouse(aw aggregate.Warehouse) error {
-	err := w.warehouseRepository.Add(aw)
+	ctx := context.Background()
+	err := w.warehouseRepository.Add(ctx, aw)
 	if err != nil {
 		return err
 	}
