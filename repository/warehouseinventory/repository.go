@@ -1,6 +1,7 @@
 package warehouseinventory
 
 import (
+	"context"
 	"errors"
 	"github.com/google/uuid"
 	"github.com/mansoorceksport/warehouse-stocking/aggregate"
@@ -12,9 +13,9 @@ var (
 )
 
 type Repository interface {
-	GetByID(id uuid.UUID) (aggregate.Product, error)
-	GetAll() []aggregate.Product
-	Add(product aggregate.Product) error
-	Update(product aggregate.Product) error
-	Delete(id uuid.UUID) error
+	GetByID(ctx context.Context, id uuid.UUID) (aggregate.Product, error)
+	GetAll(ctx context.Context) []aggregate.Product
+	Add(ctx context.Context, product aggregate.Product) error
+	Update(ctx context.Context, product aggregate.Product) error
+	Delete(ctx context.Context, id uuid.UUID) error
 }

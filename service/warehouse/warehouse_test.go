@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/mansoorceksport/warehouse-stocking/aggregate"
+	"github.com/mansoorceksport/warehouse-stocking/common/postgres"
 	"log"
 	"testing"
 )
@@ -14,6 +15,7 @@ var warehouse *Warehouse
 var products []aggregate.Product
 var orders []aggregate.Product
 var ctx context.Context
+var pq *postgres.Postgres
 
 func TestMain(m *testing.M) {
 	ctx = context.Background()
@@ -22,12 +24,12 @@ func TestMain(m *testing.M) {
 	grapes, _ := aggregate.NewProduct("grapes", 10, 0.99)
 	products = append(products, apple, orange, grapes)
 	var err error
+	pq = postgres.NewPostgres("postgres://postgres:password@localhost:5432/stocking")
 	warehouse, err = NewWarehouse(
 		//WithMemoryDepot(),
-		WithMemoryWarehouseInventory(products),
-		WithPostgresDepot(
-			"postgres://postgres:password@localhost:5432/stocking",
-		),
+		WithPostgresWarehouse(pq),
+		WithMemoryWarehouseInventory(ctx, products),
+		WithPostgresDepot(pq),
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -55,7 +57,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestWarehouse_ProcessStock(t *testing.T) {
-	err := warehouse.ProcessStockRequest(orders)
+	err := warehouse.ProcessStockRequest(ctx, orders)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +65,7 @@ func TestWarehouse_ProcessStock(t *testing.T) {
 }
 
 func printWarehouseStock(ctx context.Context) {
-	warehouseInventoryProducts := warehouse.warehouseInventoryRepository.GetAll()
+	warehouseInventoryProducts := warehouse.warehouseInventoryRepository.GetAll(ctx)
 	w, err := warehouse.warehouseRepository.GetById(ctx, warehouseId)
 	if err != nil {
 		log.Fatal(err)

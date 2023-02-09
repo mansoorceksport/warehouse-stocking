@@ -1,24 +1,25 @@
 package warehouseinventory
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"github.com/mansoorceksport/warehouse-stocking/aggregate"
 	"github.com/mansoorceksport/warehouse-stocking/repository/warehouseinventory"
 	"sync"
 )
 
-type Memory struct {
+type WarehouseInventory struct {
 	warehouseProducts map[uuid.UUID]aggregate.Product
 	sync.Mutex
 }
 
-func NewMemoryWarehouseInventory() *Memory {
-	return &Memory{
+func NewMemoryWarehouseInventory() *WarehouseInventory {
+	return &WarehouseInventory{
 		warehouseProducts: make(map[uuid.UUID]aggregate.Product),
 	}
 }
 
-func (m *Memory) GetByID(id uuid.UUID) (aggregate.Product, error) {
+func (m *WarehouseInventory) GetByID(_ context.Context, id uuid.UUID) (aggregate.Product, error) {
 	if p, ok := m.warehouseProducts[id]; ok {
 		return p, nil
 	}
@@ -26,7 +27,7 @@ func (m *Memory) GetByID(id uuid.UUID) (aggregate.Product, error) {
 	return aggregate.Product{}, warehouseinventory.ErrProductNotFound
 }
 
-func (m *Memory) GetAll() []aggregate.Product {
+func (m *WarehouseInventory) GetAll(_ context.Context) []aggregate.Product {
 	var products []aggregate.Product
 	for _, p := range m.warehouseProducts {
 		products = append(products, p)
@@ -34,7 +35,7 @@ func (m *Memory) GetAll() []aggregate.Product {
 	return products
 }
 
-func (m *Memory) Add(product aggregate.Product) error {
+func (m *WarehouseInventory) Add(_ context.Context, product aggregate.Product) error {
 	m.Lock()
 	defer m.Unlock()
 	if _, ok := m.warehouseProducts[product.GetID()]; ok {
@@ -45,7 +46,7 @@ func (m *Memory) Add(product aggregate.Product) error {
 	return nil
 }
 
-func (m *Memory) Update(product aggregate.Product) error {
+func (m *WarehouseInventory) Update(_ context.Context, product aggregate.Product) error {
 	m.Lock()
 	defer m.Unlock()
 	if _, ok := m.warehouseProducts[product.GetID()]; !ok {
@@ -55,7 +56,7 @@ func (m *Memory) Update(product aggregate.Product) error {
 	return nil
 }
 
-func (m *Memory) Delete(id uuid.UUID) error {
+func (m *WarehouseInventory) Delete(_ context.Context, id uuid.UUID) error {
 	m.Lock()
 	defer m.Unlock()
 	if _, ok := m.warehouseProducts[id]; !ok {
