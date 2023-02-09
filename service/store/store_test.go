@@ -17,7 +17,7 @@ func TestMain(m *testing.M) {
 	grapes, _ := aggregate.NewProduct("grapes", 10, 0.99)
 	products = append(products, apple, orange, grapes)
 	wh, err := warehouse.NewWarehouse(
-		warehouse.WithMemoryWarehouse(),
+		warehouse.WithMemoryDepot(),
 		warehouse.WithMemoryWarehouseInventory(products),
 	)
 	if err != nil {

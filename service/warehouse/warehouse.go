@@ -5,6 +5,7 @@ import (
 	"github.com/mansoorceksport/warehouse-stocking/aggregate"
 	warehouseRepository "github.com/mansoorceksport/warehouse-stocking/repository/depot"
 	memoryWarehouseRepository "github.com/mansoorceksport/warehouse-stocking/repository/depot/memory"
+	"github.com/mansoorceksport/warehouse-stocking/repository/depot/postgres"
 	"github.com/mansoorceksport/warehouse-stocking/repository/warehouseinventory"
 	memoryWarehouseInventoryRepository "github.com/mansoorceksport/warehouse-stocking/repository/warehouseinventory/memory"
 	"sync"
@@ -30,9 +31,16 @@ func NewWarehouse(configuration ...Configuration) (*Warehouse, error) {
 	return wh, nil
 }
 
-func WithMemoryWarehouse() Configuration {
+func WithMemoryDepot() Configuration {
 	return func(wh *Warehouse) error {
 		wh.warehouseRepository = memoryWarehouseRepository.NewMemoryWareHouse()
+		return nil
+	}
+}
+
+func WithPostgresDepot(connectionString string) Configuration {
+	return func(wh *Warehouse) error {
+		wh.warehouseRepository = postgres.NewPostgresWarehouse(connectionString)
 		return nil
 	}
 }
