@@ -16,17 +16,17 @@ type Postgres struct {
 }
 
 func NewPostgresWarehouse(connectionString string) depot.Repository {
-	postgres := &Postgres{}
+	p := &Postgres{}
 	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
 		log.Fatalf("failed to open database connection, %v", err)
 	}
-	postgres.db = db
-	err = postgres.db.Ping()
+	p.db = db
+	err = p.db.Ping()
 	if err != nil {
 		log.Fatalf("failed to ping database, %v", err)
 	}
-	return &Postgres{}
+	return p
 }
 
 func (p *Postgres) Add(ctx context.Context, aw aggregate.Warehouse) error {
